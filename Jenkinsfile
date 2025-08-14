@@ -31,18 +31,11 @@ pipeline {
             steps {
                 echo 'Running tests...'
 
-                // Instalăm jest-junit (dacă nu e deja instalat în package.json)
+                // Rulăm cu react-scripts test, dar în mod CI și cu reporter-ul JUnit
                 sh '''
-                    npm install --save-dev jest-junit
+                    CI=true npx react-scripts test --reporters=default --reporters=jest-junit
                 '''
 
-                // Rulăm testele în mod CI și generăm raportul JUnit
-                sh '''
-                    test -f build/index.html
-                    CI=true npx jest --reporters=default --reporters=jest-junit
-                '''
-
-                // Publicăm raportul în Jenkins
                 junit 'junit.xml'
             }
         }

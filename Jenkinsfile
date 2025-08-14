@@ -25,19 +25,22 @@ pipeline {
             agent {
                 docker {
                     image 'node:18-alpine'
-                    reuseNode true
+                     reuseNode true
                 }
             }
             steps {
                 echo 'Running tests...'
 
-                // Rulăm cu react-scripts test, dar în mod CI și cu reporter-ul JUnit
                 sh '''
+                    mkdir -p test-results
                     CI=true npx react-scripts test --reporters=default --reporters=jest-junit
+                    ls -la test-results
                 '''
 
-                junit 'junit.xml'
+                // citește raportul JUnit din workspace
+                junit 'test-results/junit.xml'
             }
         }
+
     }
 }

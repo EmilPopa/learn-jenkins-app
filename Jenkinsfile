@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     stages {
-        stage('Build') {
+        stage('Install & Build') {
             agent {
                 docker {
                     image 'node:18-alpine'
@@ -10,37 +10,39 @@ pipeline {
                 }
             }
             steps {
+                echo 'Installing dependencies and building project...'
                 sh '''
-                    ls -la
                     node --version
                     npm --version
                     npm ci
                     npm run build
-                    ls -la build
                 '''
             }
         }
 
-        stage('Test') {
+        stage('Run Tests') {
             agent {
                 docker {
                     image 'node:18-alpine'
-                     reuseNode true
+                    reuseNode true
                 }
             }
             steps {
-                echo 'Running tests...'
-
-                sh '''
-                    mkdir -p test-results
-                    CI=true npx react-scripts test --reporters=default --reporters=jest-junit
-                    ls -la test-results
-                '''
-
-                // citește raportul JUnit din workspace
-                junit 'test-results/junit.xml'
+                echo 'Running tests with Jest...'
+                // Creăm folderul unde va fi raportul JUnit
+                sh 'mkdir -p test-results'
+                // Rulează testele în modul CI și generează raport JUnit
+                sh 'CI=true npx react-scripts test --reporters=default --reporters=jest-junit'
+                // Verificăm că raportul există
+                sh 'ls -la test-results'
             }
         }
+    }
 
+    post {
+        always {
+            // Publicăm raportul JUnit în Jenkins indiferent de rezultat
+            junit 'test-results/junit.xml'
+        }
     }
 }

@@ -59,7 +59,7 @@ pipeline {
     post {
         always {
             // Publicăm raportul JUnit în Jenkins indiferent de rezultat
-            junit 'test-results/junit.xml'
+            junit 'jest-results/junit.xml'
         }
     }
 }
